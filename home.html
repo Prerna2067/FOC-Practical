@@ -1,0 +1,399 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Attendance Performance Dashboard</title>
+
+<style>
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: Arial, sans-serif;
+}
+
+body {
+    background: #f1f5f9;
+    color: #1e293b;
+    padding: 25px;
+}
+
+header {
+    background: #1e40af;
+    color: white;
+    padding: 25px;
+    border-radius: 12px;
+    margin-bottom: 25px;
+}
+
+header h1 {
+    margin-bottom: 8px;
+}
+
+.stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 20px;
+    margin-bottom: 25px;
+}
+
+.card {
+    background: white;
+    padding: 22px;
+    border-radius: 12px;
+    box-shadow: 0 3px 10px #0000000d;
+}
+
+.card h3 {
+    color: #64748b;
+    font-size: 14px;
+    margin-bottom: 12px;
+}
+
+.card h2 {
+    font-size: 28px;
+    color: #1e40af;
+}
+
+.content {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+    margin-bottom: 25px;
+}
+
+.section {
+    background: white;
+    padding: 22px;
+    border-radius: 12px;
+    overflow-x: auto;
+}
+
+.section h2 {
+    margin-bottom: 20px;
+}
+
+.progress-item {
+    margin-bottom: 20px;
+}
+
+.progress-item p {
+    margin-bottom: 8px;
+    display: flex;
+    justify-content: space-between;
+}
+
+.progress {
+    background: #e2e8f0;
+    height: 12px;
+    border-radius: 10px;
+    overflow: hidden;
+}
+
+.bar {
+    height: 100%;
+    border-radius: 10px;
+}
+
+.green { background: #22c55e; }
+.blue { background: #3b82f6; }
+.orange { background: #f59e0b; }
+.red { background: #ef4444; }
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    min-width: 600px;
+}
+
+th, td {
+    padding: 14px;
+    text-align: left;
+    border-bottom: 1px solid #e2e8f0;
+}
+
+th {
+    background: #eff6ff;
+}
+
+.badge {
+    padding: 5px 10px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: bold;
+}
+
+.good {
+    background: #dcfce7;
+    color: #166534;
+}
+
+.average {
+    background: #fef3c7;
+    color: #92400e;
+}
+
+.low {
+    background: #fee2e2;
+    color: #991b1b;
+}
+
+button {
+    padding: 10px 16px;
+    background: #1e40af;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    margin-bottom: 15px;
+}
+
+button:hover {
+    background: #1d4ed8;
+}
+
+@media (max-width: 750px) {
+    body { padding: 12px; }
+    .content { grid-template-columns: 1fr; }
+}
+</style>
+</head>
+
+<body>
+
+<header>
+    <h1>Attendance Performance Dashboard</h1>
+    <p>Monitor attendance, participation and student performance</p>
+</header>
+
+<div class="stats">
+    <div class="card">
+        <h3>Total Students</h3>
+        <h2 id="total">5</h2>
+    </div>
+
+    <div class="card">
+        <h3>Average Attendance</h3>
+        <h2 id="average">88%</h2>
+    </div>
+
+    <div class="card">
+        <h3>Good Attendance</h3>
+        <h2 id="goodCount">3</h2>
+    </div>
+
+    <div class="card">
+        <h3>Low Attendance</h3>
+        <h2 id="lowCount">1</h2>
+    </div>
+</div>
+
+<div class="content">
+    <div class="section">
+        <h2>Attendance Performance</h2>
+
+        <div class="progress-item">
+            <p><span>Excellent (90% and above)</span>
+            <strong>60%</strong></p>
+            <div class="progress">
+                <div class="bar green" style="width:60%"></div>
+            </div>
+        </div>
+
+        <div class="progress-item">
+            <p><span>Average (75%–89%)</span>
+            <strong>20%</strong></p>
+            <div class="progress">
+                <div class="bar blue" style="width:20%"></div>
+            </div>
+        </div>
+
+        <div class="progress-item">
+            <p><span>Needs Improvement (below 75%)</span>
+            <strong>20%</strong></p>
+            <div class="progress">
+                <div class="bar red" style="width:20%"></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="section">
+        <h2>Monthly Attendance</h2>
+        <div id="monthlyChart"
+             style="display:flex;align-items:end;gap:12px;height:210px;
+             border-bottom:2px solid #cbd5e1;padding:10px 0;">
+        </div>
+        <p style="text-align:center;margin-top:12px;color:#64748b;">
+            Attendance percentage by month
+        </p>
+    </div>
+</div>
+
+<div class="section">
+    <h2>Student Attendance Records</h2>
+
+    <button onclick="addStudent()">+ Add Student</button>
+    <button onclick="exportCSV()">Export CSV</button>
+
+    <table>
+        <thead>
+            <tr>
+                <th>Student ID</th>
+                <th>Name</th>
+                <th>Present</th>
+                <th>Total Classes</th>
+                <th>Attendance</th>
+                <th>Performance</th>
+            </tr>
+        </thead>
+        <tbody id="studentTable"></tbody>
+    </table>
+</div>
+
+<script>
+const students = [
+    { id: "ST001", name: "Rahul Sharma", present: 48, total: 50 },
+    { id: "ST002", name: "Priya Patel", present: 45, total: 50 },
+    { id: "ST003", name: "Amit Kumar", present: 38, total: 50 },
+    { id: "ST004", name: "Neha Shah", present: 32, total: 50 },
+    { id: "ST005", name: "Riya Verma", present: 47, total: 50 }
+];
+
+function getPercentage(student) {
+    return student.total > 0
+        ? (student.present / student.total) * 100
+        : 0;
+}
+
+function getPerformance(percentage) {
+    if (percentage >= 90) {
+        return '<span class="badge good">Excellent</span>';
+    } else if (percentage >= 75) {
+        return '<span class="badge average">Average</span>';
+    } else {
+        return '<span class="badge low">Needs Improvement</span>';
+    }
+}
+
+function renderStudents() {
+    const table = document.getElementById("studentTable");
+
+    table.innerHTML = students.map(student => {
+        const percentage = getPercentage(student);
+
+        return `
+            <tr>
+                <td>${student.id}</td>
+                <td>${student.name}</td>
+                <td>${student.present}</td>
+                <td>${student.total}</td>
+                <td>${percentage.toFixed(1)}%</td>
+                <td>${getPerformance(percentage)}</td>
+            </tr>
+        `;
+    }).join("");
+
+    updateStats();
+}
+
+function updateStats() {
+    const total = students.length;
+
+    const average = total
+        ? students.reduce((sum, s) => sum + getPercentage(s), 0) / total
+        : 0;
+
+    const goodCount = students.filter(
+        s => getPercentage(s) >= 90
+    ).length;
+
+    const lowCount = students.filter(
+        s => getPercentage(s) < 75
+    ).length;
+
+    document.getElementById("total").textContent = total;
+    document.getElementById("average").textContent =
+        average.toFixed(1) + "%";
+    document.getElementById("goodCount").textContent = goodCount;
+    document.getElementById("lowCount").textContent = lowCount;
+}
+
+function addStudent() {
+    const name = prompt("Enter student name:");
+    if (!name || !name.trim()) return;
+
+    const id = "ST" + String(students.length + 1).padStart(3, "0");
+
+    students.push({
+        id: id,
+        name: name.trim(),
+        present: 0,
+        total: 0
+    });
+
+    renderStudents();
+}
+
+function exportCSV() {
+    const rows = [
+        ["Student ID", "Name", "Present", "Total Classes", "Attendance %"],
+        ...students.map(s => [
+            s.id,
+            s.name,
+            s.present,
+            s.total,
+            getPercentage(s).toFixed(1)
+        ])
+    ];
+
+    const csv = rows.map(row =>
+        row.map(value =>
+            '"' + String(value).replace(/"/g, '""') + '"'
+        ).join(",")
+    ).join("\n");
+
+    const blob = new Blob([csv], {
+        type: "text/csv;charset=utf-8;"
+    });
+
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = "attendance-report.csv";
+    link.click();
+    URL.revokeObjectURL(url);
+}
+
+function renderMonthlyChart() {
+    const months = [
+        { name: "Jan", value: 82 },
+        { name: "Feb", value: 90 },
+        { name: "Mar", value: 86 },
+        { name: "Apr", value: 94 },
+        { name: "May", value: 88 },
+        { name: "Jun", value: 96 }
+    ];
+
+    document.getElementById("monthlyChart").innerHTML =
+        months.map(month => `
+            <div style="flex:1;text-align:center;height:100%;
+                        display:flex;flex-direction:column;
+                        justify-content:end;align-items:center;gap:6px;">
+                <small>${month.value}%</small>
+                <div title="${month.name}: ${month.value}%"
+                     style="background:#3b82f6;width:70%;
+                     height:${month.value}%;border-radius:5px 5px 0 0;">
+                </div>
+                <small>${month.name}</small>
+            </div>
+        `).join("");
+}
+
+renderStudents();
+renderMonthlyChart();
+</script>
+
+</body>
+</html>
